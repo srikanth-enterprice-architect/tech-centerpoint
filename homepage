@@ -1,0 +1,714 @@
+<?php
+/**
+ * Template Name: PageHome
+ * 
+ * This template serves as the homepage for the WordPress site. It includes a banner section, 
+ * popular courses, key features, testimonials, and a call to action for users to get started.
+ * 
+ * SEO Metadata:
+ * Title: Home - Tech CenterPoint
+ * Description: Discover popular development courses, key features, and testimonials from our community at Tech CenterPoint.
+ * Keywords: homepage, development courses, online learning, Tech CenterPoint, testimonials
+ * 
+ * Code Structure:
+ * - Preload WebP image for better performance.
+ * - Banner section with dynamic content from a repeater field.
+ * - Popular courses section that fetches courses from the WordPress database.
+ * - Key features and testimonials to highlight the benefits of the courses.
+ * - Call to action to encourage users to engage with the content.
+ * 
+ * Usage Instructions:
+ * To use this template, create a new page in WordPress and select "PageHome" as the template.
+ * Ensure that the necessary custom fields and repeater fields are set up in the WordPress admin.
+ * 
+ * Best Practices:
+ * - Optimize images for faster loading times.
+ * - Use descriptive alt attributes for images to improve accessibility and SEO.
+ * - Regularly update the content to keep it relevant and engaging for users.
+ */
+
+get_header(); ?>
+
+<!-- Preload the WebP image to improve LCP -->
+<link rel="preload" href="<?php echo get_template_directory_uri(); ?>/img/banner_tcp.webp" as="image">
+
+<div class="middle-area-div">
+  <div class="owl-carousel banner">
+    <?php
+    if (have_rows('banner_repeater')) :
+      while (have_rows('banner_repeater')) : the_row();
+    ?>
+        <!-- Using <picture> element for responsive image formats -->
+        <div class="mainBanner" data-bg="<?php echo get_template_directory_uri(); ?>/img/banner_tcp.webp">
+          <div class="container">
+            <div class="curvv">
+              <div class="banner_content_div">
+                <div class="txt-div">
+                  <h1><?php echo get_sub_field('banner_title'); ?></h1>
+                  <p><?php echo get_sub_field('banner_description'); ?></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+    <?php
+      endwhile;
+    else :
+      // Optional: Add a fallback in case no banner is available
+      echo '<p>No banners found.</p>';
+    endif; ?>
+  </div>
+
+
+    <div class="container home-container-div">
+      <section class="pdc-secton">
+  <div class="rLPad">
+    <div class="heading-part">
+      <h4>Popular Development Courses</h4>
+      <div class="car-navs slider-popular">
+        <div class="prev"><i class="fa-solid fa-chevron-left"></i></div>
+        <div class="next"><i class="fa-solid fa-chevron-right"></i></div>
+      </div>
+    </div>
+    <div class="owl-carousel four-items slider-popular">
+      <?php
+      // WP_Query to fetch the courses
+      $args = array(
+        'post_type' => 'course',
+        'post_status' => 'publish',
+        'posts_per_page' => 8,
+        'orderby' => 'date',
+        'order' => 'ASC',
+        'tax_query' => array(
+          array(
+            'taxonomy' => 'course_category',
+            'field' => 'term_id',
+            'terms' => 12 // Modify this term ID as needed
+          )
+        )
+      );
+      $loop = new WP_Query($args);
+
+      // Check if there are courses to display
+      if ($loop->have_posts()) :
+        while ($loop->have_posts()) : $loop->the_post();
+          // Fetch the image URL for the course (ACF field)
+          $image = get_field('course_image');
+          $image_url = $image ? esc_url($image['url']) : get_template_directory_uri() . '/img/default-course.jpg'; // Fallback image
+          $course_title = esc_html(get_the_title());
+          $course_permalink = esc_url(get_permalink());
+          $course_hours = esc_html(get_field('course_hour'));
+          $course_purchase_count = esc_html(get_field('course_purchase_count'));
+      ?>
+          <div class="item">
+            <div class="inner-iem">
+              <div class="imgSet">
+                <!-- Preload the image for better LCP (Largest Contentful Paint) -->
+                <link rel="preload" href="<?php echo $image_url; ?>" as="image">
+                <a href="<?php echo $course_permalink; ?>">
+                  <img src="<?php echo $image_url; ?>" class="img-responsive" alt="<?php echo $course_title; ?>" loading="lazy"> <!-- Lazy load added -->
+                </a>
+                <div class="courseName">
+                  <a href="<?php echo $course_permalink; ?>">
+                    <strong><?php echo $course_title; ?></strong>
+                  </a>
+                </div>
+                <div class="bottomSec">
+                  <div class="item-row">
+                    <div class="item-dv item-left-dv">
+                      <span class="icon-span">
+                        <!-- SVG Icon for Hours -->
+                        <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M64 14.9091C36.8878 14.9091 14.9091 36.8878 14.9091 64C14.9091 91.1122 36.8878 113.091 64 113.091C91.1122 113.091 113.091 91.1122 113.091 64C113.091 36.8878 91.1122 14.9091 64 14.9091ZM4 64C4 30.8629 30.8629 4 64 4C97.1371 4 124 30.8629 124 64C124 97.1371 97.1371 124 64 124C30.8629 124 4 97.1371 4 64Z" fill="black" />
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M64 25.8182C67.0124 25.8182 69.4545 28.2603 69.4545 31.2727V60.6289L88.2575 70.0304C90.9519 71.3776 92.044 74.654 90.6968 77.3484C89.3496 80.0429 86.0732 81.135 83.3788 79.7878L61.5606 68.8787C59.7127 67.9547 58.5454 66.066 58.5454 64V31.2727C58.5454 28.2603 60.9875 25.8182 64 25.8182Z" fill="black" />
+                        </svg>
+                      </span>
+                      <span class="txt-span"><?php echo $course_hours; ?> Hrs</span>
+                    </div>
+                    <div class="item-dv item-right-dv">
+                      <span class="icon-span">
+                        <!-- SVG Icon for Purchase Count -->
+                        <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path fill-rule="evenodd" clip-rule="evenodd" d="M11.3223 81.3223C16.0107 76.6339 22.3696 74 29 74H69C75.6304 74 81.9893 76.6339 86.6777 81.3223C91.3661 86.0107 94 92.3696 94 99V109C94 111.761 91.7614 114 89 114C86.2386 114 84 111.761 84 109V99C84 95.0218 82.4196 91.2064 79.6066 88.3934C76.7936 85.5804 72.9782 84 69 84H29C25.0218 84 21.2064 85.5804 18.3934 88.3934C15.5804 91.2064 14 95.0218 14 99V109C14 111.761 11.7614 114 9 114C6.23858 114 4 111.761 4 109V99C4 92.3696 6.63392 86.0107 11.3223 81.3223Z" fill="black" />
+                        </svg>
+                      </span>
+                      <span class="txt-span"><?php echo $course_purchase_count; ?></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+      <?php
+        endwhile;
+        wp_reset_postdata();
+      endif;
+      ?>
+    </div>
+  </div>
+</section>
+
+
+      
+      <section id="course">
+        <div class="">
+          <div class="heading-part">
+            <!-- <h4>What Makes us to <span class="dash"> - </span> <span>Standout </span></h4> -->
+            <h4>What Makes us to Standout</h4>
+            <div class="car-navs slider-one">
+              <div class="prev"><i class="fa-solid fa-chevron-left"></i></div>
+              <div class="next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+          </div>
+          <div class="key-features">
+            <div class="owl-carousel course slider-one">
+              <div class="item">
+                <div class="innerbecome">
+                  <div class="img-dv"> <img src="<?php echo get_stylesheet_directory_uri(); ?>/img/customer-service.webp" alt="Customer Service" class="img-responsive"> </div>
+                  <div class="content-txt-dv">
+                    <h6>Job Assistence & Support</h6>
+                    <p>We'd do everything in our power to make sure you excelled at work.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="innerbecome">
+                  <div class="img-dv"> <img src="<?php echo get_stylesheet_directory_uri(); ?>/img/24-hours-support.webp" alt="24 Hours Support" class="img-responsive"></div>
+                  <div class="content-txt-dv">
+                    <h6>24x7 Support</h6>
+                    <p>Multiple options (Email,Phone or Live Chat)exist to guarantee that your problem is resolved as soon as possible.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="innerbecome">
+                  <div class="img-dv"> <img src="<?php echo get_stylesheet_directory_uri(); ?>/img/resume.webp" alt="Resume" class="img-responsive"> </div>
+                  <div class="content-txt-dv">
+                    <h6>Job Oriented Curriculum</h6>
+                    <p>Best-in-class curriculum is totally adaptable to meet your needs and prepareyou for the job and certification.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="item">
+                <div class="innerbecome">
+                  <div class="img-dv"> <img src="<?php echo get_stylesheet_directory_uri(); ?>/img/worker.webp" alt="Worker" class="img-responsive"></div>
+                  <div class="content-txt-dv">
+                    <h6>Real world projects</h6>
+                    <p>Best-in-class instructors will lead trainees through exercies based on real-world projects.</p>
+                  </div>
+                </div>
+              </div>             
+              
+            </div>
+
+          </div>
+        </div>
+      </section>
+      <section class="mobile-standout">
+        <div class="heading-part">
+          <div class="standout">
+            <h4>What Makes us to Standout</h4>
+          </div>
+        </div>
+        <div class="standout-inner">
+          <div class="standout-content">
+            <div class="img-dv"> <img src="<?php echo get_stylesheet_directory_uri(); ?>/img/customer-service.webp" alt="Customer Service" class="img-responsive"> </div>
+            <div class="content-txt-dv">
+              <h6>Job Assistence & Support</h6>
+              <p>We'd do everything in our power to make sure you excelled at work.</p>
+            </div>
+          </div>
+          <div class="standout-content">
+            <div class="img-dv"> <img src="<?php echo get_stylesheet_directory_uri(); ?>/img/24-hours-support.webp" alt="24 Hours Support" class="img-responsive"> </div>
+            <div class="content-txt-dv">
+              <h6>24x7 Support</h6>
+              <p>Multiple options (Email,Phone or Live Chat)exist to guarantee that your problem is resolved as soon as possible.</p>
+            </div>
+          </div>
+          <div class="standout-content">
+            <div class="img-dv"> <img src="<?php echo get_stylesheet_directory_uri(); ?>/img/resume.webp" alt="Resume" class="img-responsive"> </div>
+            <div class="content-txt-dv">
+              <h6>Job Oriented Curriculum</h6>
+              <p>Best-in-class curriculum is totally adaptable to meet your needs and prepareyou for the job and certification.</p>
+            </div>
+          </div>
+          <div class="standout-content">
+            <div class="img-dv"><img src="<?php echo get_stylesheet_directory_uri(); ?>/img/worker.webp" alt="Worker" class="img-responsive"> </div>
+            <div class="content-txt-dv">
+              <h6>Real world projects</h6>
+              <p>Best-in-class instructors will lead trainees through exercies based on real-world projects.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="whyChoos">
+        <div class="heading-part">
+          <h4>&nbsp;</h4>
+          <div class="car-navs slider-three">
+            <div class="prev"><i class="fa-solid fa-chevron-left"></i></div>
+            <div class="next"><i class="fa-solid fa-chevron-right"></i></div>
+          </div>
+        </div>
+        <div id="exTab1" class="">
+          <ul class="nav nav-pills course-heading">
+            <li class="active">
+              <a href="#1a" data-toggle="tab"><i class="fa fa-check-circle icon"></i> Trending Courses</a>
+            </li>
+            <li><a href="#2a" data-toggle="tab"><i class="fa fa-check-circle icon"></i> Architech Courses</a>
+            </li>
+          </ul>
+          <div class="tab-content clearfix">
+            <div class="tab-pane active" id="1a">
+              <div class="">
+                <div class="owl-carousel  four-items slider-three">
+                  <?php
+                  $args = array(
+                    'post_type' => 'course',
+                    'post_status' => 'publish',
+                    'posts_per_page' => 8,
+                    'orderby' => 'date',
+                    'order' => 'ASC',
+                    'tax_query' => array(
+                      array(
+                        'taxonomy' => 'course_category',
+                        'field' => 'term_id',
+                        'terms' => 12
+                      )
+                    )
+                  );
+                  $loop = new WP_Query($args);
+                  while ($loop->have_posts()) : $loop->the_post();
+                    $image = get_field('course_image');
+                  ?>
+                    <div class="item">
+                      <div class="inner-iem">
+                        <div class="imgSet"> <a href="<?php echo get_permalink(); ?>"><img src="<?php echo esc_url($image['url']); ?>" class="img-responsive" alt="<?php the_title(); ?>"></a>
+                           <!--<div class="imgg"><img src="<?php echo get_the_post_thumbnail_url(); ?>"></div> -->
+                          <div class="courseName"> <a href="<?php echo get_permalink(); ?>"><strong><?php the_title(); ?></strong></a>
+                            <!-- <p><?php the_excerpt(); ?></p> -->
+                          </div>
+                          <div class="bottomSec">
+                            <div class="item-row">
+                              <div class="item-dv item-left-dv">
+                                <span class="icon-span">
+                                  <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M64 14.9091C36.8878 14.9091 14.9091 36.8878 14.9091 64C14.9091 91.1122 36.8878 113.091 64 113.091C91.1122 113.091 113.091 91.1122 113.091 64C113.091 36.8878 91.1122 14.9091 64 14.9091ZM4 64C4 30.8629 30.8629 4 64 4C97.1371 4 124 30.8629 124 64C124 97.1371 97.1371 124 64 124C30.8629 124 4 97.1371 4 64Z" fill="black" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M64 25.8182C67.0124 25.8182 69.4545 28.2603 69.4545 31.2727V60.6289L88.2575 70.0304C90.9519 71.3776 92.044 74.654 90.6968 77.3484C89.3496 80.0429 86.0732 81.135 83.3788 79.7878L61.5606 68.8787C59.7127 67.9547 58.5454 66.066 58.5454 64V31.2727C58.5454 28.2603 60.9875 25.8182 64 25.8182Z" fill="black" />
+                                  </svg>
+                                </span>
+                                <span class="txt-span"><?php echo get_field('course_hour'); ?>Hrs</span>
+                              </div>
+
+                              <div class="item-dv item-right-dv">
+                                <span class="icon-span">
+                                  <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M11.3223 81.3223C16.0107 76.6339 22.3696 74 29 74H69C75.6304 74 81.9893 76.6339 86.6777 81.3223C91.3661 86.0107 94 92.3696 94 99V109C94 111.761 91.7614 114 89 114C86.2386 114 84 111.761 84 109V99C84 95.0218 82.4196 91.2064 79.6066 88.3934C76.7936 85.5804 72.9782 84 69 84H29C25.0218 84 21.2064 85.5804 18.3934 88.3934C15.5804 91.2064 14 95.0218 14 99V109C14 111.761 11.7614 114 9 114C6.23858 114 4 111.761 4 109V99C4 92.3696 6.63392 86.0107 11.3223 81.3223Z" fill="black" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M49 24C40.7157 24 34 30.7157 34 39C34 47.2843 40.7157 54 49 54C57.2843 54 64 47.2843 64 39C64 30.7157 57.2843 24 49 24ZM24 39C24 25.1929 35.1929 14 49 14C62.8071 14 74 25.1929 74 39C74 52.8071 62.8071 64 49 64C35.1929 64 24 52.8071 24 39Z" fill="black" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M99.1588 78.4C99.8491 75.7263 102.576 74.1184 105.25 74.8088C110.613 76.1936 115.365 79.3204 118.759 83.6983C122.152 88.0761 123.996 93.4571 124 98.9963L124 109C124 111.761 121.761 114 119 114C116.239 114 114 111.761 114 109L114 99.0037C114 99.0032 114 99.0042 114 99.0037C113.997 95.6807 112.891 92.4512 110.855 89.8249C108.819 87.1982 105.968 85.3221 102.75 84.4912C100.076 83.8009 98.4684 81.0738 99.1588 78.4Z" fill="black" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M79.1562 18.4098C79.8412 15.7347 82.565 14.1213 85.2402 14.8062C90.6178 16.1831 95.3842 19.3106 98.7879 23.6957C102.192 28.0807 104.039 33.4739 104.039 39.025C104.039 44.5761 102.192 49.9693 98.7879 54.3543C95.3842 58.7394 90.6178 61.8669 85.2402 63.2437C82.565 63.9287 79.8412 62.3153 79.1562 59.6402C78.4713 56.9651 80.0847 54.2412 82.7598 53.5563C85.9863 52.7301 88.8462 50.8536 90.8884 48.2226C92.9307 45.5915 94.0392 42.3556 94.0392 39.025C94.0392 35.6944 92.9307 32.4585 90.8884 29.8274C88.8462 27.1964 85.9863 25.3199 82.7598 24.4937C80.0847 23.8088 78.4713 21.0849 79.1562 18.4098Z" fill="black" />
+                                  </svg>
+                                </span>
+                                <span class="txt-span"><?php echo get_field('course_purchase_count'); ?></span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <?php
+                  endwhile;
+                  wp_reset_postdata();
+                  ?>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane" id="2a">
+              <div class="container1">
+                <div class="owl-carousel  four-items slider-three">
+                  <?php
+                  $args = array(
+                    'post_type' => 'course',
+                    'post_status' => 'publish',
+                    'posts_per_page' => 8,
+                    'orderby' => 'date',
+                    'order' => 'ASC',
+                    'tax_query' => array(
+                      array(
+                        'taxonomy' => 'course_category',
+                        'field' => 'term_id',
+                        'terms' => 13
+                      )
+                    )
+                  );
+                  $loop = new WP_Query($args);
+                  while ($loop->have_posts()) : $loop->the_post();
+                    $image = get_field('course_image');
+                  ?>
+                    <div class="item">
+                      <div class="inner-iem">
+                        <div class="imgSet"> <a href="<?php echo get_permalink(); ?>"><img src="<?php echo esc_url($image['url']); ?>" class="img-responsive" alt="<?php the_title(); ?>"></a>
+                          <div class="imgg"><img src="<?php echo get_the_post_thumbnail_url(); ?>"></div>
+                          <div class="courseName"> <a href="<?php echo get_permalink(); ?>"><strong><?php the_title(); ?></strong></a>
+                            <!-- <p><?php the_excerpt(); ?></p> -->
+                          </div>
+                          <div class="bottomSec">
+                            <div class="item-row">
+                              <div class="item-dv item-left-dv">
+                                <span class="icon-span">
+                                  <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M64 14.9091C36.8878 14.9091 14.9091 36.8878 14.9091 64C14.9091 91.1122 36.8878 113.091 64 113.091C91.1122 113.091 113.091 91.1122 113.091 64C113.091 36.8878 91.1122 14.9091 64 14.9091ZM4 64C4 30.8629 30.8629 4 64 4C97.1371 4 124 30.8629 124 64C124 97.1371 97.1371 124 64 124C30.8629 124 4 97.1371 4 64Z" fill="black" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M64 25.8182C67.0124 25.8182 69.4545 28.2603 69.4545 31.2727V60.6289L88.2575 70.0304C90.9519 71.3776 92.044 74.654 90.6968 77.3484C89.3496 80.0429 86.0732 81.135 83.3788 79.7878L61.5606 68.8787C59.7127 67.9547 58.5454 66.066 58.5454 64V31.2727C58.5454 28.2603 60.9875 25.8182 64 25.8182Z" fill="black" />
+                                  </svg>
+                                </span>
+                                <span class="txt-span"><?php echo get_field('course_hour'); ?>Hrs</span>
+                              </div>
+
+                              <div class="item-dv item-right-dv">
+                                <span class="icon-span">
+                                  <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M11.3223 81.3223C16.0107 76.6339 22.3696 74 29 74H69C75.6304 74 81.9893 76.6339 86.6777 81.3223C91.3661 86.0107 94 92.3696 94 99V109C94 111.761 91.7614 114 89 114C86.2386 114 84 111.761 84 109V99C84 95.0218 82.4196 91.2064 79.6066 88.3934C76.7936 85.5804 72.9782 84 69 84H29C25.0218 84 21.2064 85.5804 18.3934 88.3934C15.5804 91.2064 14 95.0218 14 99V109C14 111.761 11.7614 114 9 114C6.23858 114 4 111.761 4 109V99C4 92.3696 6.63392 86.0107 11.3223 81.3223Z" fill="black" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M49 24C40.7157 24 34 30.7157 34 39C34 47.2843 40.7157 54 49 54C57.2843 54 64 47.2843 64 39C64 30.7157 57.2843 24 49 24ZM24 39C24 25.1929 35.1929 14 49 14C62.8071 14 74 25.1929 74 39C74 52.8071 62.8071 64 49 64C35.1929 64 24 52.8071 24 39Z" fill="black" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M99.1588 78.4C99.8491 75.7263 102.576 74.1184 105.25 74.8088C110.613 76.1936 115.365 79.3204 118.759 83.6983C122.152 88.0761 123.996 93.4571 124 98.9963L124 109C124 111.761 121.761 114 119 114C116.239 114 114 111.761 114 109L114 99.0037C114 99.0032 114 99.0042 114 99.0037C113.997 95.6807 112.891 92.4512 110.855 89.8249C108.819 87.1982 105.968 85.3221 102.75 84.4912C100.076 83.8009 98.4684 81.0738 99.1588 78.4Z" fill="black" />
+                                    <path fill-rule="evenodd" clip-rule="evenodd" d="M79.1562 18.4098C79.8412 15.7347 82.565 14.1213 85.2402 14.8062C90.6178 16.1831 95.3842 19.3106 98.7879 23.6957C102.192 28.0807 104.039 33.4739 104.039 39.025C104.039 44.5761 102.192 49.9693 98.7879 54.3543C95.3842 58.7394 90.6178 61.8669 85.2402 63.2437C82.565 63.9287 79.8412 62.3153 79.1562 59.6402C78.4713 56.9651 80.0847 54.2412 82.7598 53.5563C85.9863 52.7301 88.8462 50.8536 90.8884 48.2226C92.9307 45.5915 94.0392 42.3556 94.0392 39.025C94.0392 35.6944 92.9307 32.4585 90.8884 29.8274C88.8462 27.1964 85.9863 25.3199 82.7598 24.4937C80.0847 23.8088 78.4713 21.0849 79.1562 18.4098Z" fill="black" />
+                                  </svg>
+                                </span>
+                                <span class="txt-span"><?php echo get_field('course_purchase_count'); ?></span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <?php
+                  endwhile;
+                  wp_reset_postdata();
+                  ?>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section class="pdc-secton architech">
+        <div class="rLPad">
+          <div class="heading-part">
+            <h4>Architech Courses</h4>
+            <div class="car-navs slider-one">
+              <div class="prev"><i class="fa-solid fa-chevron-left"></i></div>
+              <div class="next"><i class="fa-solid fa-chevron-right"></i></div>
+            </div>
+          </div>
+          <div class="owl-carousel four-items slider-one">
+            <?php
+            $args = array(
+              'post_type' => 'course',
+              'post_status' => 'publish',
+              'posts_per_page' => 8,
+              'orderby' => 'date',
+              'order' => 'ASC',
+              'tax_query' => array(
+                array(
+                  'taxonomy' => 'course_category',
+                  'field' => 'term_id',
+                  'terms' => 13
+                )
+              )
+            );
+            $loop = new WP_Query($args);
+            while ($loop->have_posts()) : $loop->the_post();
+              $image = get_field('course_image');
+            ?>
+              <div class="item">
+                <div class="inner-iem">
+                  <div class="imgSet"> <a href="<?php echo get_permalink(); ?>"><img src="<?php echo esc_url($image['url']); ?>" class="img-responsive"></a>
+                    <div class="imgg"><img src="<?php echo get_the_post_thumbnail_url(); ?>"></div>
+                    <div class="courseName"> <a href="<?php echo get_permalink(); ?>"><strong><?php the_title(); ?></strong></a>
+                      <!-- <p><?php the_excerpt(); ?></p> -->
+                    </div>
+                    <div class="bottomSec">
+                      <div class="item-row">
+                        <div class="item-dv item-left-dv">
+                          <span class="icon-span">
+                            <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M64 14.9091C36.8878 14.9091 14.9091 36.8878 14.9091 64C14.9091 91.1122 36.8878 113.091 64 113.091C91.1122 113.091 113.091 91.1122 113.091 64C113.091 36.8878 91.1122 14.9091 64 14.9091ZM4 64C4 30.8629 30.8629 4 64 4C97.1371 4 124 30.8629 124 64C124 97.1371 97.1371 124 64 124C30.8629 124 4 97.1371 4 64Z" fill="black" />
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M64 25.8182C67.0124 25.8182 69.4545 28.2603 69.4545 31.2727V60.6289L88.2575 70.0304C90.9519 71.3776 92.044 74.654 90.6968 77.3484C89.3496 80.0429 86.0732 81.135 83.3788 79.7878L61.5606 68.8787C59.7127 67.9547 58.5454 66.066 58.5454 64V31.2727C58.5454 28.2603 60.9875 25.8182 64 25.8182Z" fill="black" />
+                            </svg>
+                          </span>
+                          <span class="txt-span"><?php echo get_field('course_hour'); ?>Hrs</span>
+                        </div>
+
+                        <div class="item-dv item-right-dv">
+                          <span class="icon-span">
+                            <svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M11.3223 81.3223C16.0107 76.6339 22.3696 74 29 74H69C75.6304 74 81.9893 76.6339 86.6777 81.3223C91.3661 86.0107 94 92.3696 94 99V109C94 111.761 91.7614 114 89 114C86.2386 114 84 111.761 84 109V99C84 95.0218 82.4196 91.2064 79.6066 88.3934C76.7936 85.5804 72.9782 84 69 84H29C25.0218 84 21.2064 85.5804 18.3934 88.3934C15.5804 91.2064 14 95.0218 14 99V109C14 111.761 11.7614 114 9 114C6.23858 114 4 111.761 4 109V99C4 92.3696 6.63392 86.0107 11.3223 81.3223Z" fill="black" />
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M49 24C40.7157 24 34 30.7157 34 39C34 47.2843 40.7157 54 49 54C57.2843 54 64 47.2843 64 39C64 30.7157 57.2843 24 49 24ZM24 39C24 25.1929 35.1929 14 49 14C62.8071 14 74 25.1929 74 39C74 52.8071 62.8071 64 49 64C35.1929 64 24 52.8071 24 39Z" fill="black" />
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M99.1588 78.4C99.8491 75.7263 102.576 74.1184 105.25 74.8088C110.613 76.1936 115.365 79.3204 118.759 83.6983C122.152 88.0761 123.996 93.4571 124 98.9963L124 109C124 111.761 121.761 114 119 114C116.239 114 114 111.761 114 109L114 99.0037C114 99.0032 114 99.0042 114 99.0037C113.997 95.6807 112.891 92.4512 110.855 89.8249C108.819 87.1982 105.968 85.3221 102.75 84.4912C100.076 83.8009 98.4684 81.0738 99.1588 78.4Z" fill="black" />
+                              <path fill-rule="evenodd" clip-rule="evenodd" d="M79.1562 18.4098C79.8412 15.7347 82.565 14.1213 85.2402 14.8062C90.6178 16.1831 95.3842 19.3106 98.7879 23.6957C102.192 28.0807 104.039 33.4739 104.039 39.025C104.039 44.5761 102.192 49.9693 98.7879 54.3543C95.3842 58.7394 90.6178 61.8669 85.2402 63.2437C82.565 63.9287 79.8412 62.3153 79.1562 59.6402C78.4713 56.9651 80.0847 54.2412 82.7598 53.5563C85.9863 52.7301 88.8462 50.8536 90.8884 48.2226C92.9307 45.5915 94.0392 42.3556 94.0392 39.025C94.0392 35.6944 92.9307 32.4585 90.8884 29.8274C88.8462 27.1964 85.9863 25.3199 82.7598 24.4937C80.0847 23.8088 78.4713 21.0849 79.1562 18.4098Z" fill="black" />
+                            </svg>
+                          </span>
+                          <span class="txt-span"><?php echo get_field('course_purchase_count'); ?></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            <?php
+            endwhile;
+            wp_reset_postdata();
+            ?>
+          </div>
+        </div>
+      </section>
+      <section class="gs-section">
+        <div class="get-started-box">
+          <div class="box-content">
+            <?php
+            $imagelearn = get_field('learn_from_us_image');
+            ?>
+            <img src="<?php echo esc_url($imagelearn['url']); ?>" alt="Learn From Us" class="img-responsive">
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="get-feature-box">
+          <h4 class="post-training">Scale up with our premium features - Post Training</h4>
+          <div class="featured-box">
+            <div class="content">
+              <?php
+              // Check rows existexists.
+              if (have_rows('post_training_repeater')) :
+                $i = 0;
+                // Loop through rows.
+                while (have_rows('post_training_repeater')) : the_row();
+                  $i++;
+                  if ($i > 3) :
+                    break;
+                  endif;
+                  $image = get_sub_field('post_training_image');
+              ?>
+                  <div class="inner">
+                    <div class="image-dv">
+                      <img src="<?php echo $image['url']; ?>" alt="<?php echo esc_attr($image['alt']); ?>" />
+                    </div>
+                    <div class="txt-dv">
+                      <h6><?php echo get_sub_field('post_training_title'); ?></h6>
+                      <p><?php echo get_sub_field('post_training_description'); ?></p>
+                    </div>
+                  </div>
+              <?php
+                // End loop.
+                endwhile;
+              // No value.
+              else :
+              // Do something...
+              endif; ?>
+            </div>
+            <div class="content">
+              <div class="inner">
+                <div class="image-dv">
+                  <img src="<?php echo get_stylesheet_directory_uri(); ?>/img/mock-interviews-icon.webp" alt="mock-interviews">
+                </div>
+                <div class="txt-dv">
+                  <h6>Mock Interviews</h6>
+                  <p>Once you know the skills, We recommended you understand the detail</p>
+                </div>
+              </div>
+              <?php
+              // Check rows existexists.
+              if (have_rows('post_training_repeater')) :
+                // Loop through rows.
+                while (have_rows('post_training_repeater')) : the_row();
+                  $image = get_sub_field('post_training_image');
+              ?>
+                  <div class="inner">
+                    <div class="image-dv">
+                      <img src="<?php echo $image['url']; ?>" alt="<?php echo esc_attr($image['alt']); ?>" />
+                    </div>
+                    <div class="txt-dv">
+                      <h6><?php echo get_sub_field('post_training_title'); ?></h6>
+                      <p><?php echo get_sub_field('post_training_description'); ?></p>
+                    </div>
+                  </div>
+              <?php
+                // End loop.
+                endwhile;
+              // No value.
+              else :
+              // Do something...
+              endif; ?>
+            </div>
+          </div>
+        </div>
+      </section>
+      <section>
+        <div class="testimonialsss">
+          <div class="row">
+            <div class="col-xs-12 col-md-3">
+              <div class="mainHead1">
+                <div class="myCentr1">Testimonilas</div>
+                <h3>Tech CenterPoint Community</h3>
+                <div class="bordes1"></div>
+                <p>These testimonials are only the tip of the iceberg when it comes to how we've helped our customers' carriers and businesses flourish as we've grown alongside them.</p>
+              </div>
+            </div>
+            <div class="col-xs-12 col-md-9">
+              <div class="heading-part">
+                <h4> </h4>
+                <div class="car-navs slider-four">
+                  <div class="prev"><i class="fa-solid fa-chevron-left"></i></div>
+                  <div class="next"><i class="fa-solid fa-chevron-right"></i></div>
+                </div>
+              </div>
+              <div class="owl-carousel  three-items slider-four">
+                <div class="item">
+                  <div class="innerItems">
+                    <div class="innerbecome1">
+                      <p>Finally grab the IT opportunity after a long wait, many thanks to your MuleSoft Trainer and the rest of your team. Especially the project-based training, problem-solving skills, quizzes, and practice sessions helped me get through the interview.</p>
+                      <div class="tbtn">
+                        <a href="#!" class="read-button"> </a>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-7">
+                          <div class="row">
+                            <div class="col-xs-9 col-md-9 sdfgh">
+                              <strong>Ramana</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-5">
+                          <!-- <img src="<?php echo site_url(); ?>/wp-content/themes/tcp-child/img/ratting.png" class="rats"> -->
+                          <div class="rating-tcp-dv">
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="innerItems">
+                    <div class="innerbecome1">
+                      <p>Tech CenterPoint helped us to complete our project goals, as we haired their resources, and that too their trainees are fully equipped with all the necessary real-time deliverables </p>
+                      <div class="tbtn">
+                        <a href="#!" class="read-button"> </a>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-7">
+                          <div class="row">
+                            <div class="col-xs-9 col-md-9 sdfgh">
+                              <strong>VM</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-5">
+                          <div class="rating-tcp-dv">
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="innerItems">
+                    <div class="innerbecome1">
+                      <p>Outstanding training was provided to our candidates, we positioned all our resources without encountering any difficulties. Thanks, alot Tech CenterPoint</p>
+                      <div class="tbtn">
+                        <a href="#!" class="read-button"> </a>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-7">
+                          <div class="row">
+                            <div class="col-xs-9 col-md-9 sdfgh">
+                              <strong>Divya</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-5">
+                          <div class="rating-tcp-dv">
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                             <i class="fa-solid fa-star active"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="innerItems">
+                    <div class="innerbecome1">
+                      <p>Tech CenterPoint helped me pass my certification exam. The training covered theoretical and practical AWS issues. The course was worth the investment; therefore, I've recommended it to others. </p>
+                      <div class="tbtn">
+                        <a href="#!" class="read-button"> </a>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-7">
+                          <div class="row">
+                            <div class="col-xs-9 col-md-9 sdfgh">
+                              <strong>George</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-5">
+                          <div class="rating-tcp-dv">
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="item">
+                  <div class="innerItems">
+                    <div class="innerbecome1">
+                      <p>Tech CenterPoint's Service-Now training is not only a lot of fun to take, but it is also jam-packed with information. It was really interesting to put the ideas that I had been learning about in class into action in a real-world setting through the project.</p>
+                      <div class="tbtn">
+                        <a href="#!" class="read-button"></a>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-7">
+                          <div class="row">
+                            <div class="col-xs-9 col-md-9 sdfgh">
+                              <strong>kethan</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-5">
+                          <div class="rating-tcp-dv">
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                            <i class="fa-solid fa-star active"></i>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+
+  <?php get_footer();
